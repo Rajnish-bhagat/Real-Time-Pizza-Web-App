@@ -6,6 +6,9 @@ const path = require('path')
 const expressLayout = require('express-ejs-layouts') //In an Express.js application, expressLayouts is a middleware that enables layout support in your views or templates.
 const PORT = process.env.PORT || 3000 // might be set externally as an environment variable, often by the hosting environment or system where the Node.js application is deployed
 
+app.use(express.static('public'))
+
+
 app.get('/',(req,res)=>{
     res.render('home')
 })
