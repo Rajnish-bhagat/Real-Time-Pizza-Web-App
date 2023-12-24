@@ -11,7 +11,7 @@ const mongoose = require('mongoose') // req to interact with mongoDB database.
 const session = require('express-session') // for storing cart we use session and we require this for that task.
 const flash = require('express-flash') // express-flash is a middleware for the Express.js framework that allows flash messages to be sent and displayed to the user. 
 const MongoDbStore = require('connect-mongo') //(note the capital MongoDbStore (constructor or class)) for storing cookies in the database else bydefault they'll be stored in main memory
-
+const passport = require('passport') // for login system
 
 // Database Connection
 const url = 'mongodb://localhost/pizza';
@@ -25,6 +25,7 @@ connection.once('open', () => {
 connection.on('error', (err) => {
     console.error('Connection error:', err.message);
 });
+
 
 // Session store (Below code didn't work due to syntax depreciation with this we had to add pass (session) to require('connect-mongo'))
 
@@ -52,16 +53,24 @@ app.use(session({
     cookie: { maxAge: 1000*24*60*60 } // 24 hour  
 }))
 
+// passport config
+const passportInit = require('./app/config/passport')
+passportInit(passport)
 
-app.use(flash()) 
+app.use(passport.initialize())
+app.use(passport.session())
+
+app.use(flash())  // for flash messages
 
 // Assets
 app.use(express.static('public')) // This line enables your Express server to serve static files (like images, CSS, JavaScript files, etc.) located in the public directory.
 app.use(express.json())
+app.use(express.urlencoded({extended: false}))
 
 // Global middleware
 app.use((req,res,next)=>{
     res.locals.session = req.session
+    res.locals.user = req.user
     next()
 })
 
