@@ -1,5 +1,5 @@
 const Menu = require('../../models/menu.js')
-
+ 
 function homeController(){
     return {
         async index(req,res){

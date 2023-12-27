@@ -3,6 +3,10 @@ const bcrypt = require('bcrypt')
 const passport = require('passport')
 
 function authController(){
+    const _getRedirectUrl=(req)=>{
+        return req.user.role === 'admin' ?  '/admin/orders' : '/customers/orders'
+
+    }
     return {
         login(req,res){
             res.render('auth/login')
@@ -32,12 +36,10 @@ function authController(){
                         req.flash('error', info.message)
                         return next(err)
                     }
+                    
 
-                    return res.redirect('/')
-
-
+                    return res.redirect(_getRedirectUrl(req))
                 })
-
             })(req,res,next)
         },
         register(req,res){
@@ -113,3 +115,44 @@ function authController(){
 }
 
 module.exports= authController
+
+
+
+
+
+
+
+
+
+
+
+
+// During the login process
+// passport.authenticate('local', (err, user) => {
+//     if (err) {
+//       // Handle error
+//     }
+//     if (!user) {
+//       // Handle invalid credentials
+//     }
+  
+//     // Manually log in the user
+//     req.logIn(user, (err) => {
+//       if (err) {
+//         // Handle error
+//       }
+  
+//       // Retrieve the user's cart data from the database
+//       Cart.findOne({ userId: user._id }, (err, cart) => {
+//         if (err) {
+//           // Handle error
+//         }
+  
+//         // Update the session with the retrieved cart data
+//         req.session.cart = cart; // or merge with existing cart data in req.session
+//         // Redirect the user to a dashboard or a desired page
+//         res.redirect('/dashboard');
+//       });
+//     });
+//   })(req, res, next);
+
