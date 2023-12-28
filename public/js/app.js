@@ -155,7 +155,6 @@ updateStatus(order);
 // Socket
 
 var socket = io();
-(0,_admin__WEBPACK_IMPORTED_MODULE_1__.initAdmin)(socket);
 
 // Join
 if (order) {
