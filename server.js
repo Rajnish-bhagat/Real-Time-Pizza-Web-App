@@ -12,6 +12,7 @@ const session = require('express-session') // for storing cart we use session an
 const flash = require('express-flash') // express-flash is a middleware for the Express.js framework that allows flash messages to be sent and displayed to the user. 
 const MongoDbStore = require('connect-mongo') //(note the capital MongoDbStore (constructor or class)) for storing cookies in the database else bydefault they'll be stored in main memory
 const passport = require('passport') // for login system
+const Emitter = require('events') // Event emitter
 
 // Database Connection
 const url = 'mongodb://localhost/pizza';
@@ -42,7 +43,11 @@ let mongoStore = MongoDbStore.create({
     // autoRemove: 'interval',     
     // autoRemoveInterval: 1 // In minutes. Default
 })
-  
+ 
+
+// Event emitter
+const eventEmitter = new Emitter()
+app.set('eventEmitter',eventEmitter) // can access anywhere in our app since it is binded now
 
 // Session config 
 app.use(session({
@@ -83,8 +88,31 @@ app.set('view engine', 'ejs') // specified view engine (e.g., EJS, Pug, Handleba
 
 require('./routes/web')(app)
 
-app.listen(PORT, ()=>{   // server starts at port 3000
+const server = app.listen(PORT, ()=>{   // server starts at port 3000
     console.log(`Listening on port ${PORT}`) // Note that backtick `${PORT}` must be used instead of '${PORT}' to print the variable
 })
 
 // different routes Note: They should be below the template engine for them to work as intended.
+
+
+// Socket 
+
+const io = require('socket.io')(server) // socket connection for realtime updates
+
+io.on('connection',(socket)=>{
+    console.log(socket.id)
+    socket.on('join',(orderId)=>{
+        console.log(orderId)
+        socket.join(orderId)
+    })
+})
+
+eventEmitter.on('orderUpdated',(data)=>{
+    io.to(`order_${data.id}`).emit('orderUpdated', data)
+
+})
+
+eventEmitter.on('orderPlaced',(data)=>{
+    io.to('adminRoom').emit('orderPlaced',data)
+
+})
